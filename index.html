@@ -606,6 +606,13 @@ function drinksCategoryId() {
   return cat?.id || null;
 }
 
+// ── Check if cart already contains a drink item ───────────────────────────────
+function cartHasDrink() {
+  const drinksId = drinksCategoryId();
+  if (!drinksId) return true; // no drinks category = don't show banner
+  return state.cart.some(line => line.item.category_id === drinksId);
+}
+
 function svgIcon(type) {
   const icons = {
     food: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>`,
@@ -676,7 +683,6 @@ function renderSuccess() {
 
 function renderTopbar() {
   const cats = state.categories;
-  // FIX 1: use state.activeCategory to set active class correctly
   const chips = [`<button class="cat-chip ${state.activeCategory === 'all' ? 'active' : ''}" data-cat="all">${t.all}</button>`];
   cats.forEach(c => {
     chips.push(`<button class="cat-chip ${state.activeCategory === c.id ? 'active' : ''}" data-cat="${c.id}">${c.name}</button>`);
@@ -710,7 +716,7 @@ function renderSearchBar() {
 function renderMenuItems() {
   let items = [...state.items];
 
-  // FIX 2: sort by lowest price first
+  // Sort by lowest price first
   items.sort((a, b) => {
     const priceA = (() => { const s = normalizeSizes(a.sizes); return s.length ? Math.min(...s.map(x=>x.price)) : Number(a.price); })();
     const priceB = (() => { const s = normalizeSizes(b.sizes); return s.length ? Math.min(...s.map(x=>x.price)) : Number(b.price); })();
@@ -732,22 +738,9 @@ function renderMenuItems() {
     return `<div class="empty-state">${t.noResults}</div>`;
   }
 
-  // Single category view — show drinks banner if not already in drinks
+  // Single category view — no drinks banner here anymore
   if (state.activeCategory !== 'all') {
-    const drinksId = drinksCategoryId();
-    const drinksBanner = (drinksId && state.activeCategory !== drinksId)
-      ? `<div class="drinks-banner" id="drinks-banner-btn">
-          <div class="drinks-banner-icon">🥤</div>
-          <div class="drinks-banner-text">
-            <div class="drinks-banner-title">${t.drinksSuggestion}</div>
-            <div class="drinks-banner-sub">${t.drinksSub}</div>
-          </div>
-          <svg class="drinks-banner-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-            <path d="M9 18l6-6-6-6"/>
-          </svg>
-        </div>` : '';
-    return drinksBanner + items.map(item => renderItemCard(item)).join('');
+    return items.map(item => renderItemCard(item)).join('');
   }
 
   // Group by category (all view)
@@ -834,7 +827,6 @@ function renderSheetContent() {
 function renderItemSheet() {
   const item  = state.selectedItem;
   if (!item) return '';
-  // FIX 3: normalize sizes and supplements using label/name
   const sizes = normalizeSizes(item.sizes);
   const sups  = normalizeSups(item.supplements);
   const price = computeLineTotal(item, state.selectedSize, state.selectedSups, state.itemQty);
@@ -896,7 +888,22 @@ function renderCartSheet() {
   const lines = state.cart;
   const sub   = cartSubtotal();
 
-  // FIX 4: cart rows with qty changer
+  // ── Drinks suggestion banner (only if no drink in cart) ──────────────────
+  const drinksId = drinksCategoryId();
+  const showDrinksBanner = drinksId && !cartHasDrink() && lines.length > 0;
+  const drinksBanner = showDrinksBanner ? `
+    <div class="drinks-banner" id="drinks-banner-btn" style="margin-top:4px;margin-bottom:4px">
+      <div class="drinks-banner-icon">🥤</div>
+      <div class="drinks-banner-text">
+        <div class="drinks-banner-title">${t.drinksSuggestion}</div>
+        <div class="drinks-banner-sub">${t.drinksSub}</div>
+      </div>
+      <svg class="drinks-banner-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+    </div>` : '';
+
   const cartRows = lines.length
     ? lines.map((line, idx) => `
         <div class="cart-item-row">
@@ -920,6 +927,7 @@ function renderCartSheet() {
     <div class="sheet-body">
       <div style="font-size:17px;font-weight:600;color:var(--text);margin-bottom:16px">${t.cart}</div>
       ${cartRows}
+      ${drinksBanner}
       ${lines.length ? `
         <div style="margin-top:16px">
           <div class="total-row grand">
@@ -984,13 +992,12 @@ function renderCheckoutSheet() {
 
 // ── Event binding ─────────────────────────────────────────────────────────────
 function bindEvents() {
-  // FIX 1: category chips — full re-render on click to update active state properly
   $('cat-scroll')?.addEventListener('click', e => {
     const btn = e.target.closest('[data-cat]');
     if (!btn) return;
     state.activeCategory = btn.dataset.cat;
     state.searchQuery = '';
-    render(); // full re-render so topbar chips also update
+    render();
   });
 
   $('search-input')?.addEventListener('input', e => {
@@ -999,16 +1006,6 @@ function bindEvents() {
   });
 
   $('menu-content')?.addEventListener('click', e => {
-    // Drinks banner
-    if (e.target.closest('#drinks-banner-btn')) {
-      const drinksId = drinksCategoryId();
-      if (drinksId) {
-        state.activeCategory = drinksId;
-        state.searchQuery = '';
-        render();
-        return;
-      }
-    }
     const card = e.target.closest('[data-item-id]');
     if (!card) return;
     openItemSheet(card.dataset.itemId);
@@ -1080,6 +1077,17 @@ function bindItemSheetEvents() {
 }
 
 function bindCartSheetEvents() {
+  // Drinks banner — closes sheet and navigates to drinks category
+  $('drinks-banner-btn')?.addEventListener('click', () => {
+    const drinksId = drinksCategoryId();
+    if (drinksId) {
+      state.activeCategory = drinksId;
+      state.searchQuery = '';
+      state.sheetMode = null;
+      render();
+    }
+  });
+
   document.querySelectorAll('[data-remove-idx]').forEach(btn => {
     btn.addEventListener('click', () => {
       state.cart.splice(+btn.dataset.removeIdx, 1);
@@ -1088,7 +1096,6 @@ function bindCartSheetEvents() {
     });
   });
 
-  // FIX 4: cart qty buttons
   document.querySelectorAll('[data-cart-minus]').forEach(btn => {
     btn.addEventListener('click', () => {
       const idx = +btn.dataset.cartMinus;
@@ -1203,10 +1210,6 @@ function refreshCartBar() {
 
 function bindMenuCardEvents() {
   $('menu-content')?.addEventListener('click', e => {
-    if (e.target.closest('#drinks-banner-btn')) {
-      const drinksId = drinksCategoryId();
-      if (drinksId) { state.activeCategory = drinksId; state.searchQuery = ''; render(); return; }
-    }
     const card = e.target.closest('[data-item-id]');
     if (!card) return;
     openItemSheet(card.dataset.itemId);
