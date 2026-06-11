@@ -8,6 +8,7 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── Dark / Light theme vars ─────────────────────────── */
 :root {
   --bg:          #0F0D0A;
   --bg2:         #1A1611;
@@ -24,6 +25,8 @@
   --red:         #EF5350;
   --red-soft:    rgba(239,83,80,0.10);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --search-bg:   rgba(15, 13, 10, 0.55);
+  --search-shadow: 0 4px 24px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.04) inset;
 }
 :root.light {
   --bg:          #F5F2EC;
@@ -40,6 +43,8 @@
   --green-soft:  rgba(46,125,50,0.10);
   --red:         #C62828;
   --red-soft:    rgba(198,40,40,0.08);
+  --search-bg:   rgba(245, 242, 236, 0.65);
+  --search-shadow: 0 4px 20px rgba(0,0,0,0.12), 0 1px 0 rgba(255,255,255,0.6) inset;
 }
 
 html, body {
@@ -87,29 +92,6 @@ html, body {
 .theme-btn:active { opacity: 0.7; }
 .theme-btn svg { width: 15px; height: 15px; }
 
-/* ── Search bar (inside topbar, inline flow) ─────────── */
-.search-wrap {
-  padding: 0 0 12px;
-}
-.search-box {
-  display: flex; align-items: center; gap: 8px;
-  background: var(--bg3);
-  border: 0.5px solid var(--border);
-  border-radius: 20px;
-  padding: 10px 14px;
-  transition: border-color 0.18s, box-shadow 0.18s;
-}
-.search-box:focus-within {
-  border-color: var(--gold-border);
-  box-shadow: 0 0 0 3px var(--gold-soft);
-}
-.search-box svg { width: 16px; height: 16px; color: var(--text3); flex-shrink: 0; }
-.search-box input {
-  background: transparent; border: none; outline: none;
-  color: var(--text); font-size: 13px; flex: 1;
-}
-.search-box input::placeholder { color: var(--text3); }
-
 /* ── Category tabs ───────────────────────────────────── */
 .cat-scroll {
   display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px;
@@ -134,8 +116,40 @@ html, body {
   color: var(--gold);
 }
 
+/* ── Floating Search bar ─────────────────────────────── */
+.search-wrap {
+  position: fixed;
+  top: 95px;
+  left: 0; right: 0;
+  z-index: 40;
+  padding: 0 16px 10px;
+  pointer-events: none;
+}
+.search-box {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--search-bg);
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  border: 0.5px solid var(--border);
+  border-radius: 20px;
+  padding: 11px 14px;
+  pointer-events: all;
+  box-shadow: var(--search-shadow);
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.search-box:focus-within {
+  border-color: var(--gold-border);
+  box-shadow: var(--search-shadow), 0 0 0 3px var(--gold-soft);
+}
+.search-box svg { width: 16px; height: 16px; color: var(--text3); flex-shrink: 0; }
+.search-box input {
+  background: transparent; border: none; outline: none;
+  color: var(--text); font-size: 13px; flex: 1;
+}
+.search-box input::placeholder { color: var(--text3); }
+
 /* ── Menu sections ───────────────────────────────────── */
-.menu-content { padding: 16px 16px 140px; }
+.menu-content { padding: 64px 16px 140px; }
 .cat-section { margin-bottom: 28px; }
 .cat-title {
   font-size: 11px; font-weight: 600; color: var(--text3);
@@ -157,11 +171,19 @@ html, body {
   transition: opacity 0.15s;
 }
 .drinks-banner:active { opacity: 0.8; }
-.drinks-banner-icon { font-size: 20px; flex-shrink: 0; }
+.drinks-banner-icon {
+  font-size: 20px; flex-shrink: 0;
+}
 .drinks-banner-text { flex: 1; }
-.drinks-banner-title { font-size: 13px; font-weight: 600; color: var(--gold); }
-.drinks-banner-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
-.drinks-banner-arrow { color: var(--gold); opacity: 0.7; }
+.drinks-banner-title {
+  font-size: 13px; font-weight: 600; color: var(--gold);
+}
+.drinks-banner-sub {
+  font-size: 11px; color: var(--text3); margin-top: 2px;
+}
+.drinks-banner-arrow {
+  color: var(--gold); opacity: 0.7;
+}
 
 /* ── Item cards ──────────────────────────────────────── */
 .item-card {
@@ -235,6 +257,7 @@ html, body {
 .sheet-desc { font-size: 13px; color: var(--text3); line-height: 1.6; margin-bottom: 12px; }
 .sheet-price { font-size: 20px; font-weight: 700; color: var(--gold); margin-bottom: 16px; }
 
+/* Sizes */
 .option-label {
   font-size: 10px; font-weight: 600; color: var(--text3);
   text-transform: uppercase; letter-spacing: 0.6px;
@@ -251,6 +274,7 @@ html, body {
   background: var(--gold-soft); border-color: var(--gold-border); color: var(--gold);
 }
 
+/* Supplements */
 .sup-chip {
   padding: 7px 12px; border-radius: 20px;
   border: 0.5px solid var(--border);
@@ -264,6 +288,7 @@ html, body {
 .sup-price { font-size: 10px; color: var(--text3); }
 .sup-chip.selected .sup-price { color: var(--gold); opacity: 0.7; }
 
+/* Note */
 .note-input {
   width: 100%; background: var(--bg3);
   border: 0.5px solid var(--border); border-radius: 12px;
@@ -273,6 +298,7 @@ html, body {
 }
 .note-input::placeholder { color: var(--text3); }
 
+/* Qty control */
 .qty-row {
   display: flex; align-items: center; justify-content: space-between;
   margin-top: 20px; gap: 12px;
@@ -352,6 +378,7 @@ html, body {
 }
 .cart-item-remove svg { width: 16px; height: 16px; }
 
+/* Cart inline qty ctrl */
 .cart-qty-ctrl {
   display: flex; align-items: center; gap: 0;
   background: var(--bg3); border: 0.5px solid var(--border);
@@ -398,6 +425,7 @@ html, body {
   border-radius: 6px; padding: 2px 7px;
 }
 
+/* ── Totals ───────────────────────────────────────────── */
 .total-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--text3); margin-bottom: 8px; }
 .total-row.grand { font-size: 16px; font-weight: 600; color: var(--gold); padding-top: 10px; border-top: 0.5px solid var(--border); margin-top: 8px; }
 
@@ -415,6 +443,7 @@ html, body {
   margin-bottom: 24px;
 }
 
+/* ── Error / loader ───────────────────────────────────── */
 .center-screen {
   min-height: 100dvh; display: flex; align-items: center;
   justify-content: center; padding: 24px;
@@ -430,6 +459,7 @@ html, body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ── Section header (cart / checkout) ────────────────── */
 .sheet-section-title {
   font-size: 10px; font-weight: 600; color: var(--text3);
   text-transform: uppercase; letter-spacing: 0.8px;
@@ -452,6 +482,7 @@ html, body {
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-primary:not(:disabled):active { opacity: 0.85; }
 
+/* No results */
 .empty-state {
   text-align: center; padding: 48px 16px;
   color: var(--text3); font-size: 13px;
@@ -463,6 +494,7 @@ html, body {
 <div id="root"></div>
 
 <script>
+// ── Translations ──────────────────────────────────────────────────────────────
 const T = {
   en: {
     table: 'Table', menu: 'Menu', search: 'Search dishes…',
@@ -516,11 +548,13 @@ const lang = (navigator.language || 'en').split('-')[0];
 const t    = T[lang] || T.en;
 document.documentElement.lang = lang;
 
+// ── Constants ─────────────────────────────────────────────────────────────────
 const API    = 'https://ujnceeaooyvmykixowmr.supabase.co/functions/v1/dine-in';
 const params = new URLSearchParams(location.search);
 const BRANCH = params.get('branch');
 const TABLE  = params.get('table');
 
+// ── Theme ─────────────────────────────────────────────────────────────────────
 let isDark = true;
 function toggleTheme() {
   isDark = !isDark;
@@ -530,12 +564,13 @@ function toggleTheme() {
   if (btn) btn.innerHTML = isDark ? svgIcon('moon') : svgIcon('sun');
 }
 
+// ── State ─────────────────────────────────────────────────────────────────────
 let state = {
   branch: null, categories: [], items: [], table: TABLE,
   activeCategory: 'all', searchQuery: '',
   cart: [],
   selectedItem: null, selectedSize: null, selectedSups: [], itemQty: 1, itemNote: '',
-  sheetMode: null,
+  sheetMode: null,   // 'item' | 'cart' | 'checkout'
   payment: 'cash',
   orderNote: '',
   submitting: false,
@@ -543,6 +578,7 @@ let state = {
   error: null,
 };
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
 function cartCount()    { return state.cart.reduce((s,l) => s + l.qty, 0); }
@@ -567,6 +603,7 @@ function computeLineTotal(item, size, sups, qty) {
   return (base + supsTotal) * qty;
 }
 
+// ── Normalize sizes/supplements (supports {label,price} and {name,price}) ────
 function normalizeSizes(raw) {
   const arr = Array.isArray(raw) ? raw : (raw ? JSON.parse(raw) : []);
   return arr.map(s => ({ label: s.label || s.name || '?', price: Number(s.price || 0) }));
@@ -577,13 +614,16 @@ function normalizeSups(raw) {
 }
 
 function drinksCategoryId() {
-  const cat = state.categories.find(c => /boisson|drink|beverage/i.test(c.name));
+  const cat = state.categories.find(c =>
+    /boisson|drink|beverage/i.test(c.name)
+  );
   return cat?.id || null;
 }
 
+// ── Check if cart already contains a drink item ───────────────────────────────
 function cartHasDrink() {
   const drinksId = drinksCategoryId();
-  if (!drinksId) return true;
+  if (!drinksId) return true; // no drinks category = don't show banner
   return state.cart.some(line => line.item.category_id === drinksId);
 }
 
@@ -601,6 +641,7 @@ function svgIcon(type) {
   return icons[type] || '';
 }
 
+// ── Render ────────────────────────────────────────────────────────────────────
 function render() {
   const root = $('root');
 
@@ -627,6 +668,7 @@ function render() {
 
   root.innerHTML = `
     ${renderTopbar()}
+    ${renderSearchBar()}
     <div class="menu-content" id="menu-content">${renderMenuItems()}</div>
     ${renderCartBar()}
     ${renderOverlay()}`;
@@ -653,7 +695,6 @@ function renderSuccess() {
     </div>`;
 }
 
-// ── KEY CHANGE: search bar is now INSIDE the topbar ───────────────────────────
 function renderTopbar() {
   const cats = state.categories;
   const chips = [`<button class="cat-chip ${state.activeCategory === 'all' ? 'active' : ''}" data-cat="all">${t.all}</button>`];
@@ -672,29 +713,36 @@ function renderTopbar() {
           <span class="table-badge">${svgIcon('table').replace('currentColor','var(--gold)')} ${t.table} ${state.table}</span>
         </div>
       </div>
-      <div class="search-wrap">
-        <div class="search-box">
-          ${svgIcon('search')}
-          <input type="search" id="search-input" placeholder="${t.search}" value="${state.searchQuery}"/>
-        </div>
-      </div>
       <div class="cat-scroll" id="cat-scroll">${chips.join('')}</div>
+    </div>`;
+}
+
+function renderSearchBar() {
+  return `
+    <div class="search-wrap">
+      <div class="search-box">
+        ${svgIcon('search')}
+        <input type="search" id="search-input" placeholder="${t.search}" value="${state.searchQuery}"/>
+      </div>
     </div>`;
 }
 
 function renderMenuItems() {
   let items = [...state.items];
 
+  // Sort by lowest price first
   items.sort((a, b) => {
     const priceA = (() => { const s = normalizeSizes(a.sizes); return s.length ? Math.min(...s.map(x=>x.price)) : Number(a.price); })();
     const priceB = (() => { const s = normalizeSizes(b.sizes); return s.length ? Math.min(...s.map(x=>x.price)) : Number(b.price); })();
     return priceA - priceB;
   });
 
+  // Category filter
   if (state.activeCategory !== 'all') {
     items = items.filter(i => i.category_id === state.activeCategory);
   }
 
+  // Search filter
   if (state.searchQuery.trim()) {
     const q = state.searchQuery.toLowerCase();
     items = items.filter(i => i.name.toLowerCase().includes(q) || (i.description || '').toLowerCase().includes(q));
@@ -704,10 +752,12 @@ function renderMenuItems() {
     return `<div class="empty-state">${t.noResults}</div>`;
   }
 
+  // Single category view
   if (state.activeCategory !== 'all') {
     return items.map(item => renderItemCard(item)).join('');
   }
 
+  // Group by category (all view)
   const catMap = {};
   items.forEach(item => {
     const key = item.category_id || '__none';
@@ -953,6 +1003,7 @@ function renderCheckoutSheet() {
     </div>`;
 }
 
+// ── Scroll active category into view ─────────────────────────────────────────
 function scrollToActiveCategory() {
   requestAnimationFrame(() => {
     const activeChip = document.querySelector('.cat-chip.active');
@@ -969,6 +1020,7 @@ function scrollToActiveCategory() {
   });
 }
 
+// ── Event binding ─────────────────────────────────────────────────────────────
 function bindEvents() {
   $('cat-scroll')?.addEventListener('click', e => {
     const btn = e.target.closest('[data-cat]');
@@ -1216,6 +1268,7 @@ function refreshSheetContent() {
   bindSheetEvents();
 }
 
+// ── Order submission ──────────────────────────────────────────────────────────
 async function submitOrder() {
   if (state.submitting || !state.cart.length) return;
   state.submitting = true;
@@ -1255,6 +1308,7 @@ async function submitOrder() {
   }
 }
 
+// ── Load ──────────────────────────────────────────────────────────────────────
 async function loadMenu() {
   if (!BRANCH || !TABLE) {
     state.error = { title: t.errorTitle, msg: 'Missing ?branch= or ?table= in URL.' };
