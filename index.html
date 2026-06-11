@@ -25,6 +25,8 @@
   --red:         #EF5350;
   --red-soft:    rgba(239,83,80,0.10);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --search-bg:   rgba(15, 13, 10, 0.55);
+  --search-shadow: 0 4px 24px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.04) inset;
 }
 :root.light {
   --bg:          #F5F2EC;
@@ -41,6 +43,8 @@
   --green-soft:  rgba(46,125,50,0.10);
   --red:         #C62828;
   --red-soft:    rgba(198,40,40,0.08);
+  --search-bg:   rgba(245, 242, 236, 0.65);
+  --search-shadow: 0 4px 20px rgba(0,0,0,0.12), 0 1px 0 rgba(255,255,255,0.6) inset;
 }
 
 html, body {
@@ -112,20 +116,30 @@ html, body {
   color: var(--gold);
 }
 
-/* ── Search bar ──────────────────────────────────────── */
+/* ── Floating Search bar ─────────────────────────────── */
 .search-wrap {
-  padding: 10px 16px 0;
-  position: sticky; top: 95px; z-index: 40;
-  background: var(--bg);
-  transition: background 0.2s;
+  position: fixed;
+  top: 95px;
+  left: 0; right: 0;
+  z-index: 40;
+  padding: 0 16px 10px;
+  pointer-events: none;
 }
 .search-box {
   display: flex; align-items: center; gap: 8px;
-  background: transparent;
+  background: var(--search-bg);
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
   border: 0.5px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 14px;
-  margin-bottom: 10px;
+  border-radius: 20px;
+  padding: 11px 14px;
+  pointer-events: all;
+  box-shadow: var(--search-shadow);
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.search-box:focus-within {
+  border-color: var(--gold-border);
+  box-shadow: var(--search-shadow), 0 0 0 3px var(--gold-soft);
 }
 .search-box svg { width: 16px; height: 16px; color: var(--text3); flex-shrink: 0; }
 .search-box input {
@@ -135,7 +149,7 @@ html, body {
 .search-box input::placeholder { color: var(--text3); }
 
 /* ── Menu sections ───────────────────────────────────── */
-.menu-content { padding: 12px 16px 140px; }
+.menu-content { padding: 64px 16px 140px; }
 .cat-section { margin-bottom: 28px; }
 .cat-title {
   font-size: 11px; font-weight: 600; color: var(--text3);
@@ -738,7 +752,7 @@ function renderMenuItems() {
     return `<div class="empty-state">${t.noResults}</div>`;
   }
 
-  // Single category view — no drinks banner here anymore
+  // Single category view
   if (state.activeCategory !== 'all') {
     return items.map(item => renderItemCard(item)).join('');
   }
@@ -888,7 +902,6 @@ function renderCartSheet() {
   const lines = state.cart;
   const sub   = cartSubtotal();
 
-  // ── Drinks suggestion banner (only if no drink in cart) ──────────────────
   const drinksId = drinksCategoryId();
   const showDrinksBanner = drinksId && !cartHasDrink() && lines.length > 0;
   const drinksBanner = showDrinksBanner ? `
@@ -990,17 +1003,13 @@ function renderCheckoutSheet() {
     </div>`;
 }
 
-// ── Scroll active category into view (chip + section) ────────────────────────
+// ── Scroll active category into view ─────────────────────────────────────────
 function scrollToActiveCategory() {
-  // 1. Scroll the active chip into view in the topbar filter bar
   requestAnimationFrame(() => {
     const activeChip = document.querySelector('.cat-chip.active');
     if (activeChip) {
       activeChip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }
-
-    // 2. In single-category view the page starts at top — just go there
-    //    In all-view, find the section element and scroll to it
     const section = document.querySelector(`[data-cat-section="${state.activeCategory}"]`);
     if (section) {
       const top = section.getBoundingClientRect().top + window.scrollY - 160;
@@ -1099,7 +1108,6 @@ function bindItemSheetEvents() {
 }
 
 function bindCartSheetEvents() {
-  // Drinks banner — closes sheet and navigates to drinks category
   $('drinks-banner-btn')?.addEventListener('click', () => {
     const drinksId = drinksCategoryId();
     if (drinksId) {
