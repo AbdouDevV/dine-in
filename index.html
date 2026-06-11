@@ -7,6 +7,8 @@
 <title>Menu</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Dark / Light theme vars ─────────────────────────── */
 :root {
   --bg:          #0F0D0A;
   --bg2:         #1A1611;
@@ -24,6 +26,22 @@
   --red-soft:    rgba(239,83,80,0.10);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
+:root.light {
+  --bg:          #F5F2EC;
+  --bg2:         #FFFFFF;
+  --bg3:         #EDE9E1;
+  --border:      #D8D1C4;
+  --text:        #1A1611;
+  --text2:       #4A4438;
+  --text3:       #8A8070;
+  --gold:        #9A6F1E;
+  --gold-soft:   rgba(154,111,30,0.10);
+  --gold-border: rgba(154,111,30,0.28);
+  --green:       #2E7D32;
+  --green-soft:  rgba(46,125,50,0.10);
+  --red:         #C62828;
+  --red-soft:    rgba(198,40,40,0.08);
+}
 
 html, body {
   background: var(--bg);
@@ -31,6 +49,7 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   min-height: 100dvh;
   overscroll-behavior: none;
+  transition: background 0.2s, color 0.2s;
 }
 
 /* ── Top bar ─────────────────────────────────────────── */
@@ -39,12 +58,14 @@ html, body {
   background: var(--bg);
   border-bottom: 0.5px solid var(--border);
   padding: 14px 16px 0;
+  transition: background 0.2s;
 }
 .topbar-row {
   display: flex; align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
 }
+.topbar-left { display: flex; align-items: center; gap: 10px; }
 .branch-name {
   font-size: 15px; font-weight: 600; color: var(--gold);
   letter-spacing: 0.4px;
@@ -55,6 +76,17 @@ html, body {
   color: var(--gold); font-size: 11px; font-weight: 600;
   padding: 4px 10px; border-radius: 20px; letter-spacing: 0.4px;
 }
+
+/* ── Theme toggle ────────────────────────────────────── */
+.theme-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--bg3); border: 0.5px solid var(--border);
+  color: var(--text3); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.18s; flex-shrink: 0;
+}
+.theme-btn:active { opacity: 0.7; }
+.theme-btn svg { width: 15px; height: 15px; }
 
 /* ── Category tabs ───────────────────────────────────── */
 .cat-scroll {
@@ -85,10 +117,11 @@ html, body {
   padding: 10px 16px 0;
   position: sticky; top: 95px; z-index: 40;
   background: var(--bg);
+  transition: background 0.2s;
 }
 .search-box {
   display: flex; align-items: center; gap: 8px;
-  background: var(--bg2);
+  background: transparent;
   border: 0.5px solid var(--border);
   border-radius: 12px;
   padding: 10px 14px;
@@ -112,6 +145,30 @@ html, body {
 }
 .cat-title::after {
   content: ''; flex: 1; height: 0.5px; background: var(--border);
+}
+
+/* ── Drinks suggestion banner ────────────────────────── */
+.drinks-banner {
+  background: var(--gold-soft);
+  border: 0.5px solid var(--gold-border);
+  border-radius: 14px; padding: 12px 14px;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.drinks-banner:active { opacity: 0.8; }
+.drinks-banner-icon {
+  font-size: 20px; flex-shrink: 0;
+}
+.drinks-banner-text { flex: 1; }
+.drinks-banner-title {
+  font-size: 13px; font-weight: 600; color: var(--gold);
+}
+.drinks-banner-sub {
+  font-size: 11px; color: var(--text3); margin-top: 2px;
+}
+.drinks-banner-arrow {
+  color: var(--gold); opacity: 0.7;
 }
 
 /* ── Item cards ──────────────────────────────────────── */
@@ -286,7 +343,7 @@ html, body {
 
 /* ── Cart sheet ───────────────────────────────────────── */
 .cart-item-row {
-  display: flex; align-items: flex-start; gap: 10px;
+  display: flex; align-items: center; gap: 10px;
   padding: 10px 0; border-bottom: 0.5px solid var(--border);
 }
 .cart-item-row:last-child { border-bottom: none; }
@@ -297,7 +354,7 @@ html, body {
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; padding: 0 4px;
 }
-.cart-item-info { flex: 1; }
+.cart-item-info { flex: 1; min-width: 0; }
 .cart-item-name { font-size: 13px; font-weight: 500; color: var(--text); }
 .cart-item-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
 .cart-item-price { font-size: 13px; font-weight: 600; color: var(--gold); white-space: nowrap; }
@@ -306,6 +363,22 @@ html, body {
   color: var(--text3); padding: 2px; line-height: 1;
 }
 .cart-item-remove svg { width: 16px; height: 16px; }
+
+/* Cart inline qty ctrl */
+.cart-qty-ctrl {
+  display: flex; align-items: center; gap: 0;
+  background: var(--bg3); border: 0.5px solid var(--border);
+  border-radius: 20px; overflow: hidden; flex-shrink: 0;
+}
+.cart-qty-btn {
+  width: 30px; height: 30px;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--gold); font-size: 16px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.cart-qty-btn:active { background: var(--gold-soft); }
+.cart-qty-num { font-size: 13px; font-weight: 600; color: var(--text); min-width: 22px; text-align: center; }
 
 /* ── Checkout form ────────────────────────────────────── */
 .payment-opts { display: flex; flex-direction: column; gap: 8px; }
@@ -426,10 +499,11 @@ const T = {
     orderId: 'Order number',
     close: 'Close', back: 'Back',
     noResults: 'No dishes found',
-    closedTitle: 'We\'re closed', closedMsg: 'The kitchen is not accepting orders right now.',
+    closedTitle: "We're closed", closedMsg: 'The kitchen is not accepting orders right now.',
     errorTitle: 'Something went wrong',
-    da: 'DA',
-    all: 'All',
+    da: 'DA', all: 'All',
+    drinksSuggestion: 'Add a drink to your order?',
+    drinksSub: 'Tap to browse beverages',
   },
   fr: {
     table: 'Table', menu: 'Menu', search: 'Chercher un plat…',
@@ -448,10 +522,11 @@ const T = {
     orderId: 'Numéro de commande',
     close: 'Fermer', back: 'Retour',
     noResults: 'Aucun plat trouvé',
-    closedTitle: 'Nous sommes fermés', closedMsg: 'La cuisine n\'accepte pas de commandes pour le moment.',
+    closedTitle: 'Nous sommes fermés', closedMsg: "La cuisine n'accepte pas de commandes pour le moment.",
     errorTitle: 'Une erreur s\'est produite',
-    da: 'DA',
-    all: 'Tout',
+    da: 'DA', all: 'Tout',
+    drinksSuggestion: 'Ajouter une boisson ?',
+    drinksSub: 'Appuyez pour voir les boissons',
   },
 };
 
@@ -465,11 +540,21 @@ const params = new URLSearchParams(location.search);
 const BRANCH = params.get('branch');
 const TABLE  = params.get('table');
 
+// ── Theme ─────────────────────────────────────────────────────────────────────
+let isDark = true;
+function toggleTheme() {
+  isDark = !isDark;
+  document.documentElement.classList.toggle('light', !isDark);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#0F0D0A' : '#F5F2EC');
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.innerHTML = isDark ? svgIcon('moon') : svgIcon('sun');
+}
+
 // ── State ─────────────────────────────────────────────────────────────────────
 let state = {
   branch: null, categories: [], items: [], table: TABLE,
   activeCategory: 'all', searchQuery: '',
-  cart: [],          // { item, size, supplements, qty, note, lineTotal }
+  cart: [],
   selectedItem: null, selectedSize: null, selectedSups: [], itemQty: 1, itemNote: '',
   sheetMode: null,   // 'item' | 'cart' | 'checkout'
   payment: 'cash',
@@ -487,9 +572,9 @@ function cartSubtotal() { return state.cart.reduce((s,l) => s + l.lineTotal, 0);
 
 function lineDesc(line) {
   const parts = [];
-  if (line.size) parts.push(line.size.name);
-  if (line.supplements?.length) parts.push(line.supplements.map(s => s.name).join(', '));
-  if (line.note) parts.push(`📝 ${line.note}`);
+  if (line.size) parts.push(line.size.label || line.size.name);
+  if (line.supplements?.length) parts.push(line.supplements.map(s => s.label || s.name).join(', '));
+  if (line.note) parts.push('📝 ' + line.note);
   return parts.join(' · ');
 }
 
@@ -504,6 +589,23 @@ function computeLineTotal(item, size, sups, qty) {
   return (base + supsTotal) * qty;
 }
 
+// ── Normalize sizes/supplements (supports {label,price} and {name,price}) ────
+function normalizeSizes(raw) {
+  const arr = Array.isArray(raw) ? raw : (raw ? JSON.parse(raw) : []);
+  return arr.map(s => ({ label: s.label || s.name || '?', price: Number(s.price || 0) }));
+}
+function normalizeSups(raw) {
+  const arr = Array.isArray(raw) ? raw : (raw ? JSON.parse(raw) : []);
+  return arr.map(s => ({ label: s.label || s.name || '?', price: Number(s.price || 0) }));
+}
+
+function drinksCategoryId() {
+  const cat = state.categories.find(c =>
+    /boisson|drink|beverage/i.test(c.name)
+  );
+  return cat?.id || null;
+}
+
 function svgIcon(type) {
   const icons = {
     food: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>`,
@@ -512,6 +614,8 @@ function svgIcon(type) {
     check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
     table: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="4" rx="1"/><path d="M5 7v14M19 7v14"/></svg>`,
     arrow: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l7 7-7 7"/></svg>`,
+    moon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+    sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
   };
   return icons[type] || '';
 }
@@ -572,6 +676,7 @@ function renderSuccess() {
 
 function renderTopbar() {
   const cats = state.categories;
+  // FIX 1: use state.activeCategory to set active class correctly
   const chips = [`<button class="cat-chip ${state.activeCategory === 'all' ? 'active' : ''}" data-cat="all">${t.all}</button>`];
   cats.forEach(c => {
     chips.push(`<button class="cat-chip ${state.activeCategory === c.id ? 'active' : ''}" data-cat="${c.id}">${c.name}</button>`);
@@ -580,8 +685,13 @@ function renderTopbar() {
   return `
     <div class="topbar">
       <div class="topbar-row">
-        <span class="branch-name">${state.branch.name}</span>
-        <span class="table-badge">${svgIcon('table').replace('currentColor','var(--gold)')} ${t.table} ${state.table}</span>
+        <div class="topbar-left">
+          <span class="branch-name">${state.branch.name}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">${svgIcon('moon')}</button>
+          <span class="table-badge">${svgIcon('table').replace('currentColor','var(--gold)')} ${t.table} ${state.table}</span>
+        </div>
       </div>
       <div class="cat-scroll" id="cat-scroll">${chips.join('')}</div>
     </div>`;
@@ -598,7 +708,14 @@ function renderSearchBar() {
 }
 
 function renderMenuItems() {
-  let items = state.items;
+  let items = [...state.items];
+
+  // FIX 2: sort by lowest price first
+  items.sort((a, b) => {
+    const priceA = (() => { const s = normalizeSizes(a.sizes); return s.length ? Math.min(...s.map(x=>x.price)) : Number(a.price); })();
+    const priceB = (() => { const s = normalizeSizes(b.sizes); return s.length ? Math.min(...s.map(x=>x.price)) : Number(b.price); })();
+    return priceA - priceB;
+  });
 
   // Category filter
   if (state.activeCategory !== 'all') {
@@ -615,16 +732,26 @@ function renderMenuItems() {
     return `<div class="empty-state">${t.noResults}</div>`;
   }
 
-  // Group by category
-  const catMap = {};
-  const catOrder = [{ id: 'all', name: '' }]; // placeholder
-
+  // Single category view — show drinks banner if not already in drinks
   if (state.activeCategory !== 'all') {
-    // Single category, no header needed
-    return items.map(item => renderItemCard(item)).join('');
+    const drinksId = drinksCategoryId();
+    const drinksBanner = (drinksId && state.activeCategory !== drinksId)
+      ? `<div class="drinks-banner" id="drinks-banner-btn">
+          <div class="drinks-banner-icon">🥤</div>
+          <div class="drinks-banner-text">
+            <div class="drinks-banner-title">${t.drinksSuggestion}</div>
+            <div class="drinks-banner-sub">${t.drinksSub}</div>
+          </div>
+          <svg class="drinks-banner-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </div>` : '';
+    return drinksBanner + items.map(item => renderItemCard(item)).join('');
   }
 
-  // Group
+  // Group by category (all view)
+  const catMap = {};
   items.forEach(item => {
     const key = item.category_id || '__none';
     if (!catMap[key]) catMap[key] = [];
@@ -632,7 +759,6 @@ function renderMenuItems() {
   });
 
   const sections = [];
-  // Maintain category sort order
   state.categories.forEach(cat => {
     if (catMap[cat.id]?.length) {
       sections.push(`
@@ -642,7 +768,6 @@ function renderMenuItems() {
         </div>`);
     }
   });
-  // Uncategorized
   if (catMap['__none']?.length) {
     sections.push(`<div class="cat-section">${catMap['__none'].map(item => renderItemCard(item)).join('')}</div>`);
   }
@@ -651,10 +776,12 @@ function renderMenuItems() {
 }
 
 function renderItemCard(item) {
-  const inCart = state.cart.some(l => l.item.id === item.id);
+  const inCart  = state.cart.some(l => l.item.id === item.id);
   const cartQty = state.cart.filter(l => l.item.id === item.id).reduce((s,l) => s + l.qty, 0);
-  const sizes   = Array.isArray(item.sizes) ? item.sizes : (item.sizes ? JSON.parse(item.sizes) : []);
-  const price   = sizes.length ? `${Math.min(...sizes.map(s => Number(s.price)))} ${t.da}` : `${Number(item.price).toFixed(2)} ${t.da}`;
+  const sizes   = normalizeSizes(item.sizes);
+  const price   = sizes.length
+    ? `${Math.min(...sizes.map(s => s.price))} ${t.da}`
+    : `${Number(item.price).toFixed(2)} ${t.da}`;
 
   return `
     <div class="item-card ${inCart ? 'in-cart' : ''}" data-item-id="${item.id}">
@@ -698,8 +825,8 @@ function renderOverlay() {
 }
 
 function renderSheetContent() {
-  if (state.sheetMode === 'item') return renderItemSheet();
-  if (state.sheetMode === 'cart') return renderCartSheet();
+  if (state.sheetMode === 'item')     return renderItemSheet();
+  if (state.sheetMode === 'cart')     return renderCartSheet();
   if (state.sheetMode === 'checkout') return renderCheckoutSheet();
   return '';
 }
@@ -707,8 +834,9 @@ function renderSheetContent() {
 function renderItemSheet() {
   const item  = state.selectedItem;
   if (!item) return '';
-  const sizes = Array.isArray(item.sizes) ? item.sizes : (item.sizes ? JSON.parse(item.sizes) : []);
-  const sups  = Array.isArray(item.supplements) ? item.supplements : (item.supplements ? JSON.parse(item.supplements) : []);
+  // FIX 3: normalize sizes and supplements using label/name
+  const sizes = normalizeSizes(item.sizes);
+  const sups  = normalizeSups(item.supplements);
   const price = computeLineTotal(item, state.selectedSize, state.selectedSups, state.itemQty);
 
   return `
@@ -725,8 +853,8 @@ function renderItemSheet() {
         <div class="option-label">${t.size}</div>
         <div class="options-row">
           ${sizes.map((s,i) => `
-            <button class="opt-chip ${state.selectedSize?.name === s.name ? 'selected' : ''}"
-                    data-size-idx="${i}">${s.name} — ${Number(s.price).toFixed(2)} ${t.da}</button>
+            <button class="opt-chip ${state.selectedSize?.label === s.label ? 'selected' : ''}"
+                    data-size-idx="${i}">${s.label} — ${s.price.toFixed(2)} ${t.da}</button>
           `).join('')}
         </div>` : ''}
 
@@ -734,10 +862,10 @@ function renderItemSheet() {
         <div class="option-label">${t.extras}</div>
         <div class="options-row">
           ${sups.map((s,i) => `
-            <button class="sup-chip ${state.selectedSups.some(x => x.name === s.name) ? 'selected' : ''}"
+            <button class="sup-chip ${state.selectedSups.some(x => x.label === s.label) ? 'selected' : ''}"
                     data-sup-idx="${i}">
-              ${s.name}
-              ${Number(s.price) > 0 ? `<span class="sup-price">+${Number(s.price).toFixed(2)}</span>` : ''}
+              ${s.label}
+              ${s.price > 0 ? `<span class="sup-price">+${s.price.toFixed(2)}</span>` : ''}
             </button>
           `).join('')}
         </div>` : ''}
@@ -768,15 +896,20 @@ function renderCartSheet() {
   const lines = state.cart;
   const sub   = cartSubtotal();
 
+  // FIX 4: cart rows with qty changer
   const cartRows = lines.length
     ? lines.map((line, idx) => `
         <div class="cart-item-row">
-          <span class="cart-qty-badge">x${line.qty}</span>
           <div class="cart-item-info">
             <div class="cart-item-name">${line.item.name}</div>
             ${lineDesc(line) ? `<div class="cart-item-sub">${lineDesc(line)}</div>` : ''}
+            <div style="margin-top:6px;color:var(--gold);font-size:12px;font-weight:600">${line.lineTotal.toFixed(2)} ${t.da}</div>
           </div>
-          <span class="cart-item-price">${line.lineTotal.toFixed(2)} ${t.da}</span>
+          <div class="cart-qty-ctrl">
+            <button class="cart-qty-btn" data-cart-minus="${idx}">−</button>
+            <span class="cart-qty-num">${line.qty}</span>
+            <button class="cart-qty-btn" data-cart-plus="${idx}">+</button>
+          </div>
           <button class="cart-item-remove" data-remove-idx="${idx}">${svgIcon('trash')}</button>
         </div>`)
       .join('')
@@ -794,7 +927,7 @@ function renderCartSheet() {
             <span>${sub.toFixed(2)} ${t.da}</span>
           </div>
         </div>
-        <button class="btn-primary" id="to-checkout-btn" ${lines.length ? '' : 'disabled'}>
+        <button class="btn-primary" id="to-checkout-btn">
           ${t.checkout}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
@@ -851,32 +984,38 @@ function renderCheckoutSheet() {
 
 // ── Event binding ─────────────────────────────────────────────────────────────
 function bindEvents() {
-  // Category chips
+  // FIX 1: category chips — full re-render on click to update active state properly
   $('cat-scroll')?.addEventListener('click', e => {
     const btn = e.target.closest('[data-cat]');
     if (!btn) return;
     state.activeCategory = btn.dataset.cat;
     state.searchQuery = '';
-    refreshMenu();
+    render(); // full re-render so topbar chips also update
   });
 
-  // Search
   $('search-input')?.addEventListener('input', e => {
     state.searchQuery = e.target.value;
     refreshMenu();
   });
 
-  // Item cards
   $('menu-content')?.addEventListener('click', e => {
+    // Drinks banner
+    if (e.target.closest('#drinks-banner-btn')) {
+      const drinksId = drinksCategoryId();
+      if (drinksId) {
+        state.activeCategory = drinksId;
+        state.searchQuery = '';
+        render();
+        return;
+      }
+    }
     const card = e.target.closest('[data-item-id]');
     if (!card) return;
     openItemSheet(card.dataset.itemId);
   });
 
-  // Cart bar
   $('cart-bar-btn')?.addEventListener('click', () => openCartSheet());
 
-  // Overlay close (tap outside)
   $('overlay')?.addEventListener('click', e => {
     if (e.target === $('overlay')) closeSheet();
   });
@@ -885,37 +1024,35 @@ function bindEvents() {
 }
 
 function bindSheetEvents() {
-  if (state.sheetMode === 'item') bindItemSheetEvents();
-  if (state.sheetMode === 'cart') bindCartSheetEvents();
+  if (state.sheetMode === 'item')     bindItemSheetEvents();
+  if (state.sheetMode === 'cart')     bindCartSheetEvents();
   if (state.sheetMode === 'checkout') bindCheckoutSheetEvents();
 }
 
 function bindItemSheetEvents() {
   const item  = state.selectedItem;
-  const sizes = Array.isArray(item.sizes) ? item.sizes : (item.sizes ? JSON.parse(item.sizes) : []);
-  const sups  = Array.isArray(item.supplements) ? item.supplements : (item.supplements ? JSON.parse(item.supplements) : []);
+  const sizes = normalizeSizes(item.sizes);
+  const sups  = normalizeSups(item.supplements);
 
-  // Size chips
   document.querySelectorAll('[data-size-idx]').forEach(btn => {
     btn.addEventListener('click', () => {
       const s = sizes[+btn.dataset.sizeIdx];
-      state.selectedSize = state.selectedSize?.name === s.name ? null : s;
+      state.selectedSize = state.selectedSize?.label === s.label ? null : s;
       updateItemSheetPrice();
       document.querySelectorAll('[data-size-idx]').forEach(b => {
-        b.classList.toggle('selected', sizes[+b.dataset.sizeIdx].name === state.selectedSize?.name);
+        b.classList.toggle('selected', sizes[+b.dataset.sizeIdx].label === state.selectedSize?.label);
       });
     });
   });
 
-  // Sup chips
   document.querySelectorAll('[data-sup-idx]').forEach(btn => {
     btn.addEventListener('click', () => {
       const s = sups[+btn.dataset.supIdx];
-      const idx = state.selectedSups.findIndex(x => x.name === s.name);
+      const idx = state.selectedSups.findIndex(x => x.label === s.label);
       if (idx >= 0) state.selectedSups.splice(idx, 1);
       else state.selectedSups.push(s);
       updateItemSheetPrice();
-      btn.classList.toggle('selected', state.selectedSups.some(x => x.name === s.name));
+      btn.classList.toggle('selected', state.selectedSups.some(x => x.label === s.label));
     });
   });
 
@@ -947,8 +1084,39 @@ function bindCartSheetEvents() {
     btn.addEventListener('click', () => {
       state.cart.splice(+btn.dataset.removeIdx, 1);
       refreshSheetContent();
+      refreshCartBar();
     });
   });
+
+  // FIX 4: cart qty buttons
+  document.querySelectorAll('[data-cart-minus]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = +btn.dataset.cartMinus;
+      if (state.cart[idx].qty > 1) {
+        state.cart[idx].qty--;
+        state.cart[idx].lineTotal = computeLineTotal(
+          state.cart[idx].item, state.cart[idx].size, state.cart[idx].supplements, state.cart[idx].qty
+        );
+      } else {
+        state.cart.splice(idx, 1);
+      }
+      refreshSheetContent();
+      refreshCartBar();
+    });
+  });
+
+  document.querySelectorAll('[data-cart-plus]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = +btn.dataset.cartPlus;
+      state.cart[idx].qty++;
+      state.cart[idx].lineTotal = computeLineTotal(
+        state.cart[idx].item, state.cart[idx].size, state.cart[idx].supplements, state.cart[idx].qty
+      );
+      refreshSheetContent();
+      refreshCartBar();
+    });
+  });
+
   $('to-checkout-btn')?.addEventListener('click', () => {
     state.sheetMode = 'checkout';
     refreshSheetContent();
@@ -956,7 +1124,6 @@ function bindCartSheetEvents() {
 }
 
 function bindCheckoutSheetEvents() {
-  // Payment opts (only cash active)
   document.querySelectorAll('[data-pay]').forEach(opt => {
     if (opt.classList.contains('disabled')) return;
     opt.addEventListener('click', () => {
@@ -980,7 +1147,7 @@ function bindCheckoutSheetEvents() {
 function updateItemSheetPrice() {
   const price = computeLineTotal(state.selectedItem, state.selectedSize, state.selectedSups, state.itemQty);
   const el = $('sheet-price');
-  if (el) el.textContent = `${price.toFixed(2)} ${t.da}`;
+  if (el) el.textContent = price.toFixed(2) + ' ' + t.da;
 }
 
 function updateQtyDisplay() {
@@ -992,7 +1159,7 @@ function updateQtyDisplay() {
 function openItemSheet(itemId) {
   const item = state.items.find(i => i.id === itemId);
   if (!item) return;
-  const sizes = Array.isArray(item.sizes) ? item.sizes : (item.sizes ? JSON.parse(item.sizes) : []);
+  const sizes = normalizeSizes(item.sizes);
   state.selectedItem  = item;
   state.selectedSize  = sizes.length ? sizes[0] : null;
   state.selectedSups  = [];
@@ -1010,30 +1177,36 @@ function openCartSheet() {
 function closeSheet() {
   state.sheetMode = null;
   refreshSheet();
-  refreshMenu(); // re-render item cards to update qty badges
+  refreshMenu();
 }
 
 function refreshMenu() {
   const mc = $('menu-content');
   if (mc) mc.innerHTML = renderMenuItems();
+  refreshCartBar();
   bindMenuCardEvents();
-  // Update cart bar
+}
+
+function refreshCartBar() {
   const cb = $('cart-bar');
-  if (cb) {
-    const count = cartCount();
-    cb.classList.toggle('visible', count > 0);
-    const btn = $('cart-bar-btn');
-    if (btn) btn.innerHTML = `
-      <div class="cart-btn-left">
-        <span class="cart-count">${count}</span>
-        <span class="cart-label">${t.viewCart}</span>
-      </div>
-      <span class="cart-total">${cartSubtotal().toFixed(2)} ${t.da}</span>`;
-  }
+  if (!cb) return;
+  const count = cartCount();
+  cb.classList.toggle('visible', count > 0);
+  const btn = $('cart-bar-btn');
+  if (btn) btn.innerHTML = `
+    <div class="cart-btn-left">
+      <span class="cart-count">${count}</span>
+      <span class="cart-label">${t.viewCart}</span>
+    </div>
+    <span class="cart-total">${cartSubtotal().toFixed(2)} ${t.da}</span>`;
 }
 
 function bindMenuCardEvents() {
   $('menu-content')?.addEventListener('click', e => {
+    if (e.target.closest('#drinks-banner-btn')) {
+      const drinksId = drinksCategoryId();
+      if (drinksId) { state.activeCategory = drinksId; state.searchQuery = ''; render(); return; }
+    }
     const card = e.target.closest('[data-item-id]');
     if (!card) return;
     openItemSheet(card.dataset.itemId);
@@ -1051,19 +1224,7 @@ function refreshSheet() {
   overlay.classList.toggle('open', !!state.sheetMode);
   sheet.innerHTML = renderSheetContent();
   bindSheetEvents();
-  // Refresh cart bar too
-  const cb = $('cart-bar');
-  if (cb) {
-    const count = cartCount();
-    cb.classList.toggle('visible', count > 0);
-    const btn = $('cart-bar-btn');
-    if (btn) btn.innerHTML = `
-      <div class="cart-btn-left">
-        <span class="cart-count">${count}</span>
-        <span class="cart-label">${t.viewCart}</span>
-      </div>
-      <span class="cart-total">${cartSubtotal().toFixed(2)} ${t.da}</span>`;
-  }
+  refreshCartBar();
 }
 
 function refreshSheetContent() {
@@ -1084,8 +1245,8 @@ async function submitOrder() {
     id:          line.item.id,
     name:        line.item.name,
     quantity:    line.qty,
-    unit_price:  computeLineTotal(line.item, line.size, line.supplements, 1) / 1,
-    size:        line.size?.name || null,
+    unit_price:  computeLineTotal(line.item, line.size, line.supplements, 1),
+    size:        line.size?.label || null,
     supplements: line.supplements || [],
     note:        line.note || null,
   }));
@@ -1119,16 +1280,13 @@ async function loadMenu() {
     state.error = { title: t.errorTitle, msg: 'Missing ?branch= or ?table= in URL.' };
     render(); return;
   }
-  render(); // show spinner
+  render();
   try {
     const res  = await fetch(`${API}?branch=${BRANCH}&table=${encodeURIComponent(TABLE)}`);
     const data = await res.json();
     if (data.error) {
-      if (res.status === 403) {
-        state.error = { title: t.closedTitle, msg: t.closedMsg };
-      } else {
-        state.error = { title: t.errorTitle, msg: data.error };
-      }
+      state.error = { title: res.status === 403 ? t.closedTitle : t.errorTitle,
+                      msg:   res.status === 403 ? t.closedMsg   : data.error };
       render(); return;
     }
     state.branch     = data.branch;
