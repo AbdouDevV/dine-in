@@ -503,7 +503,7 @@ const T = {
     size: 'Choose size', extras: 'Add extras', note: 'Special request (optional)',
     notePlaceholder: 'e.g. no onions, extra sauce…',
     qty: 'Quantity', subtotal: 'Subtotal', total: 'Total',
-    payment: 'Payment method', cash: 'Cash', card: 'Card', ccp: 'CCP / Baridi',
+    payment: 'Payment method', cash: 'Cash', card: 'Card',
     comingSoon: 'Coming soon',
     placeOrder: 'Place Order', ordering: 'Ordering…',
     emptyCart: 'Your order is empty', addItems: 'Tap items to add them',
@@ -980,11 +980,6 @@ function renderCheckoutSheet() {
         <div class="pay-opt disabled" data-pay="card">
           <div class="pay-radio"></div>
           <span class="pay-opt-label">${t.card}</span>
-          <span class="pay-soon">${t.comingSoon}</span>
-        </div>
-        <div class="pay-opt disabled" data-pay="ccp">
-          <div class="pay-radio"></div>
-          <span class="pay-opt-label">${t.ccp}</span>
           <span class="pay-soon">${t.comingSoon}</span>
         </div>
       </div>
