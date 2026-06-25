@@ -977,11 +977,10 @@ function renderCheckoutSheet() {
           <div class="pay-radio"></div>
           <span class="pay-opt-label">${t.cash}</span>
         </div>
-        <div class="pay-opt disabled" data-pay="card">
-          <div class="pay-radio"></div>
-          <span class="pay-opt-label">${t.card}</span>
-          <span class="pay-soon">${t.comingSoon}</span>
-        </div>
+        <div class="pay-opt ${state.payment === 'card' ? 'selected' : ''}" data-pay="card">
+      <div class="pay-radio"></div>
+      <span class="pay-opt-label">${t.card}</span>
+       </div>
       </div>
 
       <div style="margin-top:20px">
@@ -1158,11 +1157,10 @@ function bindCartSheetEvents() {
 
 function bindCheckoutSheetEvents() {
   document.querySelectorAll('[data-pay]').forEach(opt => {
-    if (opt.classList.contains('disabled')) return;
     opt.addEventListener('click', () => {
       state.payment = opt.dataset.pay;
       document.querySelectorAll('[data-pay]').forEach(o => {
-        o.classList.toggle('selected', o.dataset.pay === state.payment && !o.classList.contains('disabled'));
+        o.classList.toggle('selected', o.dataset.pay === state.payment);
       });
     });
   });
