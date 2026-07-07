@@ -627,6 +627,15 @@ function cartHasDrink() {
   return state.cart.some(line => line.item.category_id === drinksId);
 }
 
+// ── Payment methods allowed on the digital menu (separate from POS) ──────────
+// Backed by branches.menu_payment_cash / branches.menu_payment_card
+function menuAllowsCash() {
+  return state.branch?.menu_payment_cash !== false; // default true if column missing
+}
+function menuAllowsCard() {
+  return state.branch?.menu_payment_card === true; // default false if column missing
+}
+
 function svgIcon(type) {
   const icons = {
     food: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>`,
@@ -961,6 +970,34 @@ function renderCartSheet() {
 function renderCheckoutSheet() {
   const sub = cartSubtotal();
 
+  const allowCash = menuAllowsCash();
+  const allowCard = menuAllowsCard();
+
+  const payOptions = [];
+  if (allowCash) {
+    payOptions.push(`
+      <div class="pay-opt ${state.payment === 'cash' ? 'selected' : ''}" data-pay="cash">
+        <div class="pay-radio"></div>
+        <span class="pay-opt-label">${t.cash}</span>
+      </div>`);
+  }
+  if (allowCard) {
+    payOptions.push(`
+      <div class="pay-opt ${state.payment === 'card' ? 'selected' : ''}" data-pay="card">
+        <div class="pay-radio"></div>
+        <span class="pay-opt-label">${t.card}</span>
+      </div>`);
+  }
+  // Fallback: if branch has neither enabled (misconfiguration), default to cash
+  // so checkout never renders with zero options.
+  if (!payOptions.length) {
+    payOptions.push(`
+      <div class="pay-opt selected" data-pay="cash">
+        <div class="pay-radio"></div>
+        <span class="pay-opt-label">${t.cash}</span>
+      </div>`);
+  }
+
   return `
     <div class="sheet-handle"></div>
     <div class="sheet-body">
@@ -973,14 +1010,7 @@ function renderCheckoutSheet() {
 
       <div class="sheet-section-title">${t.payment}</div>
       <div class="payment-opts">
-        <div class="pay-opt ${state.payment === 'cash' ? 'selected' : ''}" data-pay="cash">
-          <div class="pay-radio"></div>
-          <span class="pay-opt-label">${t.cash}</span>
-        </div>
-        <div class="pay-opt ${state.payment === 'card' ? 'selected' : ''}" data-pay="card">
-      <div class="pay-radio"></div>
-      <span class="pay-opt-label">${t.card}</span>
-       </div>
+        ${payOptions.join('')}
       </div>
 
       <div style="margin-top:20px">
@@ -1320,6 +1350,11 @@ async function loadMenu() {
     state.categories = data.categories;
     state.items      = data.items;
     state.table      = data.table;
+
+    // Default the selected payment method to whichever the branch actually
+    // allows on the digital menu (menu_payment_cash / menu_payment_card).
+    state.payment = menuAllowsCash() ? 'cash' : (menuAllowsCard() ? 'card' : 'cash');
+
     render();
   } catch (err) {
     state.error = { title: t.errorTitle, msg: err.message };
