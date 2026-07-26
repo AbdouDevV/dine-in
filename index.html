@@ -746,11 +746,11 @@ const PTR_MAX       = 110;
 const PTR_RESISTANCE = 0.5;
 
 function ptrSetVisual(dist, animated) {
-  const root    = $('root');
+  const content = $('ptr-content');
   const spinner = $('ptr-spinner');
-  if (!root || !spinner) return;
-  root.style.transition    = animated ? 'transform 0.25s ease' : 'none';
-  root.style.transform     = `translateY(${dist}px)`;
+  if (!content || !spinner) return;
+  content.style.transition = animated ? 'transform 0.25s ease' : 'none';
+  content.style.transform  = `translateY(${dist}px)`;
   spinner.style.transition = animated ? 'opacity 0.25s ease' : 'none';
   spinner.style.opacity    = String(Math.min(dist / PTR_THRESHOLD, 1));
 }
@@ -820,9 +820,11 @@ function render() {
   }
 
   root.innerHTML = `
-    ${renderTopbar()}
+    <div id="ptr-content">
+      ${renderTopbar()}
+      <div class="menu-content" id="menu-content">${renderMenuItems()}</div>
+    </div>
     ${renderSearchBar()}
-    <div class="menu-content" id="menu-content">${renderMenuItems()}</div>
     ${renderCartBar()}
     ${renderOverlay()}`;
 
