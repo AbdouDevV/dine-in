@@ -291,7 +291,14 @@ html, body {
   backdrop-filter: blur(6px);
 }
 .mv-hint svg { width: 11px; height: 11px; }
-  
+
+/* Photo / 3D toggle */
+.view-toggle {
+  position: absolute; top: 12px; right: 12px; z-index: 2;
+  display: flex; background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(8px);
+  border-radius: 20px; padding: 3px; gap: 2px;
+}
 .view-toggle-btn {
   display: flex; align-items: center; gap: 4px;
   padding: 6px 11px; border-radius: 18px;
