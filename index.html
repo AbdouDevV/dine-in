@@ -61,7 +61,6 @@ html, body {
 .topbar {
   position: sticky; top: 0; z-index: 50;
   background: var(--bg);
-  border-bottom: 0.5px solid var(--border);
   padding: 14px 16px 0;
   transition: background 0.2s;
 }
@@ -97,6 +96,7 @@ html, body {
 .cat-scroll {
   display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px;
   scrollbar-width: none;
+  border-bottom: 0.5px solid var(--border);
 }
 .cat-scroll::-webkit-scrollbar { display: none; }
 .cat-chip {
@@ -120,7 +120,7 @@ html, body {
 /* ── Search bar (lives inside the topbar so it scrolls/drags as one unit
    with the header during pull-to-refresh — no more fixed positioning) ── */
 .search-inline {
-  padding: 0 0 12px;
+  padding: 12px 0 12px;
 }
 .search-box {
   display: flex; align-items: center; gap: 8px;
