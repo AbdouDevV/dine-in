@@ -117,10 +117,20 @@ html, body {
   color: var(--gold);
 }
 
-/* ── Search bar (lives inside the topbar so it scrolls/drags as one unit
-   with the header during pull-to-refresh — no more fixed positioning) ── */
+/* ── Search bar ──────────────────────────────────────────
+   Own sticky element, pinned just below the sticky topbar (branch name
+   + category chips). It still lives inside #ptr-content — same as the
+   topbar — so both move together as one unit during pull-to-refresh;
+   only their sticky *positions* are separate, not their drag behavior.
+   The `top` offset is set in JS (updateStickyOffsets) to exactly match
+   the rendered height of .topbar, so the two never overlap. ── */
 .search-inline {
-  padding: 12px 0 12px;
+  position: sticky;
+  top: 64px; /* fallback; overwritten by JS with the real topbar height */
+  z-index: 49;
+  background: var(--bg);
+  padding: 12px 16px;
+  transition: background 0.2s;
 }
 .search-box {
   display: flex; align-items: center; gap: 8px;
@@ -881,6 +891,7 @@ function render() {
   root.innerHTML = `
     <div id="ptr-content">
       ${renderTopbar()}
+      ${renderSearchBar()}
       <div class="menu-content" id="menu-content">${renderMenuItems()}</div>
     </div>
     ${renderCartBar()}
@@ -888,6 +899,20 @@ function render() {
 
   bindEvents();
   setupSheetDragToClose();
+  updateStickyOffsets();
+}
+
+// ── Keep the search bar pinned exactly below the topbar ──────────────────────
+// The topbar's height isn't fixed (branch name / table number length can
+// wrap or vary), so instead of hardcoding a pixel offset we measure the
+// real rendered height and use it as the search bar's sticky `top`. This
+// keeps the two bars from ever overlapping, without re-fusing them into a
+// single sticky element.
+function updateStickyOffsets() {
+  const topbar = $('topbar');
+  const searchBar = $('search-bar');
+  if (!topbar || !searchBar) return;
+  searchBar.style.top = topbar.offsetHeight + 'px';
 }
 
 function renderSuccess() {
@@ -909,11 +934,9 @@ function renderSuccess() {
     </div>`;
 }
 
-// The search bar is now rendered *inside* the topbar (right after the
-// category chips) instead of as a separately fixed-positioned element.
-// Because the topbar lives inside #ptr-content, it now moves together
-// with the header as a single unit during the pull-to-refresh drag —
-// nothing can desync or jump anymore.
+// Topbar (branch name + table badge + category chips) stays sticky at
+// top:0. It still lives inside #ptr-content, so it moves together with
+// the rest of the header as one unit during pull-to-refresh.
 function renderTopbar() {
   const cats = state.categories;
   const chips = [`<button class="cat-chip ${state.activeCategory === 'all' ? 'active' : ''}" data-cat="all">${t.all}</button>`];
@@ -922,7 +945,7 @@ function renderTopbar() {
   });
 
   return `
-    <div class="topbar">
+    <div class="topbar" id="topbar">
       <div class="topbar-row">
         <div class="topbar-left">
           <span class="branch-name">${state.branch.name}</span>
@@ -933,11 +956,20 @@ function renderTopbar() {
         </div>
       </div>
       <div class="cat-scroll" id="cat-scroll">${chips.join('')}</div>
-      <div class="search-inline">
-        <div class="search-box">
-          ${svgIcon('search')}
-          <input type="search" id="search-input" placeholder="${t.search}" value="${state.searchQuery}"/>
-        </div>
+    </div>`;
+}
+
+// Search bar: its own sticky element, rendered as a *sibling* of .topbar
+// (not nested inside it) so it's a visually/structurally separate bar.
+// It still lives inside #ptr-content, right after the topbar, so it still
+// drags together with the header as one unit during pull-to-refresh —
+// only its sticky position is independent, pinned just below the topbar.
+function renderSearchBar() {
+  return `
+    <div class="search-inline" id="search-bar">
+      <div class="search-box">
+        ${svgIcon('search')}
+        <input type="search" id="search-input" placeholder="${t.search}" value="${state.searchQuery}"/>
       </div>
     </div>`;
 }
@@ -1624,6 +1656,7 @@ async function loadMenu() {
   await reloadMenuData();
 }
 
+window.addEventListener('resize', updateStickyOffsets);
 setupPullToRefresh();
 loadMenu();
 </script>
