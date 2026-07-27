@@ -1297,7 +1297,16 @@ function bindEvents() {
     if (btn.dataset.cat === state.activeCategory && !state.searchQuery) return; // already active, nothing to do
     state.activeCategory = btn.dataset.cat;
     state.searchQuery = '';
-    render();
+
+    // Update chip active states in place (don't recreate the strip's DOM —
+    // that would reset its scrollLeft to 0 and break the smooth scroll below)
+    document.querySelectorAll('#cat-scroll [data-cat]').forEach(chip => {
+      chip.classList.toggle('active', chip.dataset.cat === state.activeCategory);
+    });
+    const searchInput = $('search-input');
+    if (searchInput) searchInput.value = '';
+
+    refreshMenu();
     scrollToActiveCategory();
   });
 
