@@ -1294,6 +1294,7 @@ function bindEvents() {
   $('cat-scroll')?.addEventListener('click', e => {
     const btn = e.target.closest('[data-cat]');
     if (!btn) return;
+    if (btn.dataset.cat === state.activeCategory && !state.searchQuery) return; // already active, nothing to do
     state.activeCategory = btn.dataset.cat;
     state.searchQuery = '';
     render();
