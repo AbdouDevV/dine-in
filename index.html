@@ -698,6 +698,12 @@ function drinksCategoryId() {
   return cat?.id || null;
 }
 
+// ── Pick the right placeholder icon for an item's category (drinks vs food) ──
+function itemPlaceholderIcon(item) {
+  const drinksId = drinksCategoryId();
+  return (drinksId && item?.category_id === drinksId) ? 'drink' : 'food';
+}
+
 // ── Check if cart already contains a drink item ───────────────────────────────
 function cartHasDrink() {
   const drinksId = drinksCategoryId();
@@ -717,6 +723,7 @@ function menuAllowsCard() {
 function svgIcon(type) {
   const icons = {
     food: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h0a2 2 0 002-2V2M5 2v20M3 2v7M7 2v7"/><path fill="currentColor" stroke="none" d="M16 2c-2 1.2-3 3.6-3 7 0 3 1 5.2 3 6.4V22h1V2h-1z"/></svg>`,
+    drink: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 8l1.1 11.2a2 2 0 002 1.8h2.8a2 2 0 002-1.8L16.5 8"/><path d="M6 8h12"/><path d="M14.5 8l1.8-5"/></svg>`,
     search: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>`,
     trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>`,
     check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
@@ -1044,7 +1051,7 @@ function renderItemCard(item) {
       <div class="item-img-wrap">
         ${item.image_url
           ? `<img class="item-img" src="${item.image_url}" alt="${item.name}" loading="lazy"/>`
-          : `<div class="item-img-placeholder">${svgIcon('food')}</div>`}
+          : `<div class="item-img-placeholder">${svgIcon(itemPlaceholderIcon(item))}</div>`}
       </div>
       <div class="item-info">
         <div class="item-name">${item.name}</div>
@@ -1125,7 +1132,7 @@ function renderItemMedia(item) {
       </div>`;
   }
 
-  return `<div class="sheet-media"><div class="sheet-img-placeholder">${svgIcon('food').replace('currentColor','var(--text3)')}</div></div>`;
+  return `<div class="sheet-media"><div class="sheet-img-placeholder">${svgIcon(itemPlaceholderIcon(item)).replace('currentColor','var(--text3)')}</div></div>`;
 }
 
 function renderItemSheet() {
