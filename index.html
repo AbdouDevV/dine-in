@@ -61,8 +61,22 @@ html, body {
 .topbar {
   position: sticky; top: 0; z-index: 50;
   background: var(--bg);
+  border-bottom: 0.5px solid var(--border);
   padding: 14px 16px 0;
-  transition: background 0.2s;
+  transition: background 0.35s ease, backdrop-filter 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+}
+/* Floating glass state — applied once the page has scrolled a bit, so the
+   header lifts off the content, blurs whatever is passing underneath it,
+   and casts a soft shadow like it's hovering above the menu. */
+.topbar.scrolled {
+  background: var(--search-bg);
+  backdrop-filter: blur(22px) saturate(1.7);
+  -webkit-backdrop-filter: blur(22px) saturate(1.7);
+  border-bottom-color: transparent;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+:root.light .topbar.scrolled {
+  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
 }
 .topbar-row {
   display: flex; align-items: center;
@@ -96,7 +110,6 @@ html, body {
 .cat-scroll {
   display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px;
   scrollbar-width: none;
-  border-bottom: 0.5px solid var(--border);
 }
 .cat-scroll::-webkit-scrollbar { display: none; }
 .cat-chip {
@@ -120,7 +133,7 @@ html, body {
 /* ── Search bar (lives inside the topbar so it scrolls/drags as one unit
    with the header during pull-to-refresh — no more fixed positioning) ── */
 .search-inline {
-  padding: 12px 0 12px;
+  padding: 0 0 12px;
 }
 .search-box {
   display: flex; align-items: center; gap: 8px;
@@ -136,6 +149,16 @@ html, body {
 .search-box:focus-within {
   border-color: var(--gold-border);
   box-shadow: var(--search-shadow), 0 0 0 3px var(--gold-soft);
+}
+/* Extra lift + clarity for the pill itself while the header is floating,
+   so it reads as a distinct frosted layer sitting above the scrolling menu
+   rather than just part of the header background. */
+.topbar.scrolled .search-box {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.06) inset;
+}
+:root.light .topbar.scrolled .search-box {
+  box-shadow: 0 10px 20px rgba(0,0,0,0.10), 0 1px 0 rgba(255,255,255,0.6) inset;
 }
 .search-box svg { width: 16px; height: 16px; color: var(--text3); flex-shrink: 0; }
 .search-box input {
@@ -245,33 +268,16 @@ html, body {
   border-top: 0.5px solid var(--border);
   width: 100%; max-height: 88dvh;
   overflow-y: auto;
-  overscroll-behavior: contain;
   padding-bottom: calc(20px + var(--safe-bottom));
   transform: translateY(100%);
   transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
 }
 .overlay.open .sheet { transform: translateY(0); }
-.sheet-handle-zone {
-  position: relative;
-  height: 18px;
-  touch-action: none;
-}
 .sheet-handle {
-  position: absolute;
-  top: 8px; left: 50%;
-  width: 44px; height: 5px;
-  background: var(--border);
-  border-radius: 3px;
-  transform: translateX(-50%);
+  width: 36px; height: 4px; background: var(--border);
+  border-radius: 2px; margin: 12px auto 0;
 }
-/* Invisible extra hit area so the drag target stays easy to grab
-   without adding visible whitespace above the sheet content */
-.sheet-handle-zone::before {
-  content: '';
-  position: absolute;
-  top: -12px; left: 0; right: 0; bottom: -12px;
-}
-.sheet-media { position: relative; margin-top: 4px; }
+.sheet-media { position: relative; margin-top: 12px; }
 .sheet-img {
   width: 100%; height: 200px; object-fit: cover;
   display: block;
@@ -290,13 +296,13 @@ html, body {
 }
 .mv-ar-btn {
   position: absolute; right: 12px; bottom: 12px;
-  display: flex; align-items: center; justify-content: center;
-  width: 40px; height: 40px;
+  display: flex; align-items: center; gap: 6px;
   background: var(--gold); color: var(--bg);
-  border: none; border-radius: 50%;
+  border: none; border-radius: 20px;
+  padding: 8px 14px; font-size: 12px; font-weight: 700;
   cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
-.mv-ar-btn svg { width: 20px; height: 20px; }
+.mv-ar-btn svg { width: 14px; height: 14px; }
 .mv-hint {
   position: absolute; top: 12px; left: 12px;
   background: rgba(0,0,0,0.45); color: #fff;
@@ -806,13 +812,43 @@ function setupPullToRefresh() {
   });
 }
 
+// ── Topbar glass / floating state ────────────────────────────────────────────
+// Toggles a class once the user scrolls past a tiny threshold, so the search
+// bar (and the header behind it) turns into a blurred, floating glass pill
+// with menu items visible/blurred underneath, instead of the flat opaque bar
+// shown at the very top of the page.
+const TOPBAR_SCROLL_THRESHOLD = 4;
+let topbarScrolled = false;
+let topbarTicking  = false;
+
+function updateTopbarGlassState() {
+  const topbar = document.querySelector('.topbar');
+  if (!topbar) return;
+  const shouldBeScrolled = window.scrollY > TOPBAR_SCROLL_THRESHOLD;
+  if (shouldBeScrolled !== topbarScrolled) {
+    topbarScrolled = shouldBeScrolled;
+    topbar.classList.toggle('scrolled', topbarScrolled);
+  }
+}
+
+function setupTopbarGlassOnScroll() {
+  window.addEventListener('scroll', () => {
+    if (topbarTicking) return;
+    topbarTicking = true;
+    requestAnimationFrame(() => {
+      updateTopbarGlassState();
+      topbarTicking = false;
+    });
+  }, { passive: true });
+}
+
 // ── Sheet drag-to-close ───────────────────────────────────────────────────────
 // Only the drag handle at the top of the sheet can be used to drag the
 // sheet closed. Scrolling the sheet's content never triggers a close-drag.
 let sheetDrag = { startY: 0, lastDy: 0, dragging: false };
 
 function setupSheetDragToClose() {
-  const handle = document.querySelector('#sheet .sheet-handle-zone');
+  const handle = document.querySelector('#sheet .sheet-handle');
   if (!handle) return;
   handle.addEventListener('touchstart', onHandleTouchStart, { passive: true });
   handle.addEventListener('touchmove', onHandleTouchMove, { passive: false });
@@ -888,6 +924,7 @@ function render() {
 
   bindEvents();
   setupSheetDragToClose();
+  updateTopbarGlassState();
 }
 
 function renderSuccess() {
@@ -1078,7 +1115,7 @@ function renderItemMedia(item) {
           ar-modes="webxr scene-viewer quick-look"
         >
           <div slot="progress-bar"></div>
-          <button slot="ar-button" class="mv-ar-btn">${svgIcon('ar')}</button>
+          <button slot="ar-button" class="mv-ar-btn">${svgIcon('ar')} ${t.ar}</button>
         </model-viewer>
         <div class="mv-hint">${svgIcon('drag')} ${t.dragHint}</div>
       </div>`;
@@ -1102,7 +1139,7 @@ function renderItemSheet() {
   const price = computeLineTotal(item, state.selectedSize, state.selectedSups, state.itemQty);
 
   return `
-    <div class="sheet-handle-zone"><div class="sheet-handle"></div></div>
+    <div class="sheet-handle"></div>
     ${renderItemMedia(item)}
     <div class="sheet-body">
       <div class="sheet-name">${item.name}</div>
@@ -1190,7 +1227,7 @@ function renderCartSheet() {
     : `<div class="empty-state">${t.emptyCart}<br/><span style="font-size:11px;margin-top:6px;display:block">${t.addItems}</span></div>`;
 
   return `
-    <div class="sheet-handle-zone"><div class="sheet-handle"></div></div>
+    <div class="sheet-handle"></div>
     <div class="sheet-body">
       <div style="font-size:17px;font-weight:600;color:var(--text);margin-bottom:16px">${t.cart}</div>
       ${cartRows}
@@ -1244,7 +1281,7 @@ function renderCheckoutSheet() {
   }
 
   return `
-    <div class="sheet-handle-zone"><div class="sheet-handle"></div></div>
+    <div class="sheet-handle"></div>
     <div class="sheet-body">
       <div style="font-size:17px;font-weight:600;color:var(--text);margin-bottom:4px">${t.checkout}</div>
       <div style="font-size:11px;color:var(--text3);margin-bottom:16px">${t.table} ${state.table}</div>
@@ -1294,19 +1331,9 @@ function bindEvents() {
   $('cat-scroll')?.addEventListener('click', e => {
     const btn = e.target.closest('[data-cat]');
     if (!btn) return;
-    if (btn.dataset.cat === state.activeCategory && !state.searchQuery) return; // already active, nothing to do
     state.activeCategory = btn.dataset.cat;
     state.searchQuery = '';
-
-    // Update chip active states in place (don't recreate the strip's DOM —
-    // that would reset its scrollLeft to 0 and break the smooth scroll below)
-    document.querySelectorAll('#cat-scroll [data-cat]').forEach(chip => {
-      chip.classList.toggle('active', chip.dataset.cat === state.activeCategory);
-    });
-    const searchInput = $('search-input');
-    if (searchInput) searchInput.value = '';
-
-    refreshMenu();
+    render();
     scrollToActiveCategory();
   });
 
@@ -1625,6 +1652,7 @@ async function loadMenu() {
 }
 
 setupPullToRefresh();
+setupTopbarGlassOnScroll();
 loadMenu();
 </script>
 </body>
