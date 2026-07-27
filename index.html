@@ -26,8 +26,9 @@
   --red:         #EF5350;
   --red-soft:    rgba(239,83,80,0.10);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --search-bg:   rgba(15, 13, 10, 0.55);
-  --search-shadow: 0 4px 24px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.04) inset;
+  --search-bg:   rgba(24, 21, 16, 0.42);
+  --search-shadow: 0 4px 24px rgba(0,0,0,0.35), 0 1px 0 rgba(255,255,255,0.06) inset;
+  --topbar-bg:   rgba(15, 13, 10, 0.68);
 }
 :root.light {
   --bg:          #F5F2EC;
@@ -44,8 +45,9 @@
   --green-soft:  rgba(46,125,50,0.10);
   --red:         #C62828;
   --red-soft:    rgba(198,40,40,0.08);
-  --search-bg:   rgba(245, 242, 236, 0.65);
-  --search-shadow: 0 4px 20px rgba(0,0,0,0.12), 0 1px 0 rgba(255,255,255,0.6) inset;
+  --search-bg:   rgba(255, 255, 255, 0.5);
+  --search-shadow: 0 4px 20px rgba(0,0,0,0.12), 0 1px 0 rgba(255,255,255,0.7) inset;
+  --topbar-bg:   rgba(245, 242, 236, 0.72);
 }
 
 html, body {
@@ -60,23 +62,12 @@ html, body {
 /* ── Top bar ─────────────────────────────────────────── */
 .topbar {
   position: sticky; top: 0; z-index: 50;
-  background: var(--bg);
+  background: var(--topbar-bg);
+  backdrop-filter: blur(22px) saturate(1.6);
+  -webkit-backdrop-filter: blur(22px) saturate(1.6);
   border-bottom: 0.5px solid var(--border);
   padding: 14px 16px 0;
-  transition: background 0.35s ease, backdrop-filter 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
-}
-/* Floating glass state — applied once the page has scrolled a bit, so the
-   header lifts off the content, blurs whatever is passing underneath it,
-   and casts a soft shadow like it's hovering above the menu. */
-.topbar.scrolled {
-  background: var(--search-bg);
-  backdrop-filter: blur(22px) saturate(1.7);
-  -webkit-backdrop-filter: blur(22px) saturate(1.7);
-  border-bottom-color: transparent;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-}
-:root.light .topbar.scrolled {
-  box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+  transition: background 0.2s;
 }
 .topbar-row {
   display: flex; align-items: center;
@@ -149,16 +140,6 @@ html, body {
 .search-box:focus-within {
   border-color: var(--gold-border);
   box-shadow: var(--search-shadow), 0 0 0 3px var(--gold-soft);
-}
-/* Extra lift + clarity for the pill itself while the header is floating,
-   so it reads as a distinct frosted layer sitting above the scrolling menu
-   rather than just part of the header background. */
-.topbar.scrolled .search-box {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 26px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.06) inset;
-}
-:root.light .topbar.scrolled .search-box {
-  box-shadow: 0 10px 20px rgba(0,0,0,0.10), 0 1px 0 rgba(255,255,255,0.6) inset;
 }
 .search-box svg { width: 16px; height: 16px; color: var(--text3); flex-shrink: 0; }
 .search-box input {
@@ -812,36 +793,6 @@ function setupPullToRefresh() {
   });
 }
 
-// ── Topbar glass / floating state ────────────────────────────────────────────
-// Toggles a class once the user scrolls past a tiny threshold, so the search
-// bar (and the header behind it) turns into a blurred, floating glass pill
-// with menu items visible/blurred underneath, instead of the flat opaque bar
-// shown at the very top of the page.
-const TOPBAR_SCROLL_THRESHOLD = 4;
-let topbarScrolled = false;
-let topbarTicking  = false;
-
-function updateTopbarGlassState() {
-  const topbar = document.querySelector('.topbar');
-  if (!topbar) return;
-  const shouldBeScrolled = window.scrollY > TOPBAR_SCROLL_THRESHOLD;
-  if (shouldBeScrolled !== topbarScrolled) {
-    topbarScrolled = shouldBeScrolled;
-    topbar.classList.toggle('scrolled', topbarScrolled);
-  }
-}
-
-function setupTopbarGlassOnScroll() {
-  window.addEventListener('scroll', () => {
-    if (topbarTicking) return;
-    topbarTicking = true;
-    requestAnimationFrame(() => {
-      updateTopbarGlassState();
-      topbarTicking = false;
-    });
-  }, { passive: true });
-}
-
 // ── Sheet drag-to-close ───────────────────────────────────────────────────────
 // Only the drag handle at the top of the sheet can be used to drag the
 // sheet closed. Scrolling the sheet's content never triggers a close-drag.
@@ -924,7 +875,6 @@ function render() {
 
   bindEvents();
   setupSheetDragToClose();
-  updateTopbarGlassState();
 }
 
 function renderSuccess() {
@@ -1652,7 +1602,6 @@ async function loadMenu() {
 }
 
 setupPullToRefresh();
-setupTopbarGlassOnScroll();
 loadMenu();
 </script>
 </body>
