@@ -253,15 +253,15 @@ html, body {
 .overlay.open .sheet { transform: translateY(0); }
 .sheet-handle-zone {
   position: relative;
-  height: 14px;
+  height: 18px;
   touch-action: none;
 }
 .sheet-handle {
   position: absolute;
   top: 8px; left: 50%;
-  width: 36px; height: 4px;
+  width: 44px; height: 5px;
   background: var(--border);
-  border-radius: 2px;
+  border-radius: 3px;
   transform: translateX(-50%);
 }
 /* Invisible extra hit area so the drag target stays easy to grab
@@ -269,9 +269,9 @@ html, body {
 .sheet-handle-zone::before {
   content: '';
   position: absolute;
-  top: -14px; left: 0; right: 0; bottom: -14px;
+  top: -12px; left: 0; right: 0; bottom: -12px;
 }
-.sheet-media { position: relative; margin-top: 8px; }
+.sheet-media { position: relative; margin-top: 4px; }
 .sheet-img {
   width: 100%; height: 200px; object-fit: cover;
   display: block;
@@ -290,13 +290,13 @@ html, body {
 }
 .mv-ar-btn {
   position: absolute; right: 12px; bottom: 12px;
-  display: flex; align-items: center; gap: 6px;
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px;
   background: var(--gold); color: var(--bg);
-  border: none; border-radius: 20px;
-  padding: 8px 14px; font-size: 12px; font-weight: 700;
+  border: none; border-radius: 50%;
   cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
-.mv-ar-btn svg { width: 14px; height: 14px; }
+.mv-ar-btn svg { width: 20px; height: 20px; }
 .mv-hint {
   position: absolute; top: 12px; left: 12px;
   background: rgba(0,0,0,0.45); color: #fff;
@@ -1078,7 +1078,7 @@ function renderItemMedia(item) {
           ar-modes="webxr scene-viewer quick-look"
         >
           <div slot="progress-bar"></div>
-          <button slot="ar-button" class="mv-ar-btn">${svgIcon('ar')} ${t.ar}</button>
+          <button slot="ar-button" class="mv-ar-btn">${svgIcon('ar')}</button>
         </model-viewer>
         <div class="mv-hint">${svgIcon('drag')} ${t.dragHint}</div>
       </div>`;
